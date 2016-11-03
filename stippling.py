@@ -8,14 +8,16 @@ BG_COLOR = (160, 178, 129)
 PIXEL_COLOR = (10, 12, 6)
 NONPIXEL_COLOR = (156, 170, 125)
 TRANSPARENT_COLOR = (0, 0, 0, 0)
+BTN_BORDER_COLOR = (128, 12, 24)
+BTN_CENTER_COLOR = (200, 33, 44)
 
 screen.fill(BG_COLOR)
 
+def get_bits(number, num_bits):
+    return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
+
 def renderPixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
     """Returns none"""
-    def get_bits(number, num_bits):
-        return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
-
     pixels = pygame.PixelArray(surface)
     for y in range(surface.get_height()):
         bits = get_bits(image_data[y], surface.get_width())
@@ -49,6 +51,22 @@ screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
 screen.blit(pygame.transform.flip(flush_img, True, False), (128, 16))
 screen.blit(pygame.transform.flip(health_img, True, False), (192, 16))
 screen.blit(pygame.transform.flip(zzz_img, True, False), (256, 16))
+
+pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64,420, 64, 64))
+pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68,424, 56, 56))
+pygame.draw.ellipse(screen, PIXEL_COLOR, (64,420, 64, 64), 1)
+
+pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64+96,420, 64, 64))
+pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68+96,424, 56, 56))
+pygame.draw.ellipse(screen, PIXEL_COLOR, (64+96,420, 64, 64), 1)
+
+pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64+192,420, 64, 64))
+pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68+192,424, 56, 56))
+pygame.draw.ellipse(screen, PIXEL_COLOR, (64+192,420, 64, 64), 1)
+
+for x in range(32):
+    for y in range(32):
+        pygame.draw.rect(screen, NONPIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
 
 while True:
     for event in pygame.event.get():
