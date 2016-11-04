@@ -77,8 +77,9 @@ for x in range(32):
 pygame.display.flip()
 pygame.time.wait(1000)
 
+off = -2
 for x in range(32):
-    bits = get_bits(IDLE_EGG[1][x], 32)
+    bits = get_bits(IDLE_EGG[0][x], 32+off)
     for y, bit in enumerate(bits):
         if (bit):
             pygame.draw.rect(screen, PIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
