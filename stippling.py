@@ -16,7 +16,7 @@ screen.fill(BG_COLOR)
 def get_bits(number, num_bits):
     return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
 
-def renderPixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
+def render_pixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
     """Returns none"""
     pixels = pygame.PixelArray(surface)
     for y in range(surface.get_height()):
@@ -41,11 +41,11 @@ FLUSH = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x2000000,0x5000000,0x5000000,0x4800000,0x4
 HEALTH = [0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x3ffffc0,0xc000030,0x10912488,0x10912488,0x10492908,0x8000010,0x8000010,0x8000410,0x4000820,0x4001020,0x4002020,0x201c040,0x201c040,0x1ffff80,0x0,0x0,0x0]
 ZZZ = [0x0,0x0,0x0,0x0,0xf800000,0x4000000,0x2000000,0x1000000,0xf800000,0x0,0x0,0x3c00000,0x1000000,0x800000,0x3c00000,0x0,0x700000,0x200000,0x700000,0x0,0x80000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0]
 
-renderPixels(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-renderPixels(feed_img, FEED, PIXEL_COLOR, NONPIXEL_COLOR)
-renderPixels(flush_img, FLUSH, PIXEL_COLOR, NONPIXEL_COLOR)
-renderPixels(health_img, HEALTH, PIXEL_COLOR, NONPIXEL_COLOR)
-renderPixels(zzz_img, ZZZ, PIXEL_COLOR, NONPIXEL_COLOR)
+render_pixels(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
+render_pixels(feed_img, FEED, PIXEL_COLOR, NONPIXEL_COLOR)
+render_pixels(flush_img, FLUSH, PIXEL_COLOR, NONPIXEL_COLOR)
+render_pixels(health_img, HEALTH, PIXEL_COLOR, NONPIXEL_COLOR)
+render_pixels(zzz_img, ZZZ, PIXEL_COLOR, NONPIXEL_COLOR)
 
 screen.blit(pygame.transform.flip(feed_img, True, False), (64, 16))
 screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
@@ -72,10 +72,7 @@ for x in range(32):
             pygame.draw.rect(screen, PIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
         else:
             pygame.draw.rect(screen, NONPIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
-#for x in range(32):
-#    for y in range(32):
-        #bits = get_bits(IDLE_EGG[1][y], 32)
-        #for r, bit in enumerate(bits):
+
 
 pygame.display.flip()
 pygame.time.wait(1000)
