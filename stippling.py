@@ -28,6 +28,18 @@ def render_pixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
                 pixels[x][y] = bg_color
     del pixels
 
+def render_panel(surface, image_data, fg_color, bg_color):
+    for y in range(32):
+        bits = get_bits(image_data[y], 32+off)
+        bits.reverse()
+        for x, bit in enumerate(bits):
+            if (bit):
+                color = fg_color
+            else:
+                color = bg_color
+            if x < 32 and x > off:
+                pygame.draw.rect(surface, color, ((x-off)*10+32, y*10+64, 8, 8))
+
 selector_img = pygame.Surface((32, 32)).convert_alpha()
 feed_img = pygame.Surface((32, 32))
 flush_img = pygame.Surface((32, 32))
@@ -65,26 +77,17 @@ pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64+192,420, 64, 64))
 pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68+192,424, 56, 56))
 pygame.draw.ellipse(screen, PIXEL_COLOR, (64+192,420, 64, 64), 1)
 
-for x in range(32):
-    bits = get_bits(IDLE_EGG[0][x], 32)
-    for y, bit in enumerate(bits):
-        if (bit):
-            pygame.draw.rect(screen, PIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
-        else:
-            pygame.draw.rect(screen, NONPIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
-
-
-pygame.display.flip()
-pygame.time.wait(1000)
-
-off = -2
-for x in range(32):
-    bits = get_bits(IDLE_EGG[0][x], 32+off)
-    for y, bit in enumerate(bits):
-        if (bit):
-            pygame.draw.rect(screen, PIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
-        else:
-            pygame.draw.rect(screen, NONPIXEL_COLOR, (y*10+32, x*10+64, 8, 8))
+off = 0
+import random
+for i in range(100):
+    if i%2:
+        j = 0
+    else:
+        j = 1
+    render_panel(screen, IDLE_EGG[j], PIXEL_COLOR, NONPIXEL_COLOR)
+    pygame.display.flip()
+    pygame.time.wait(1000)
+    off = random.randint(-2,4)
 
 while True:
     for event in pygame.event.get():
