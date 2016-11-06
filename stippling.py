@@ -48,10 +48,21 @@ energy = 0
 waste = 0
 age = 0
 happiness = 0
+
+off = 0
+selid = 0
+spid = 0
+cleanincr = 0
+
 mousex = 0
 mousey = 0
+
 mouse_moved = False
-off = 0
+has_overlay_animation = False
+
+current_animation = IDLE_EGG
+overlay_animation = OVERLAY_ZZZ
+stats_page = DISPLAY_HUNGER
 
 import pygame, random, sys
 
@@ -61,10 +72,10 @@ pygame.display.set_caption('TamagotchiPy')
 screen.fill(BG_COLOR)
 
 def get_bits(number, num_bits):
+    """Solution from http://stackoverflow.com/questions/16659944/iterate-between-bits-in-a-binary-number"""
     return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
 
 def render_pixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
-    """Returns none"""
     pixels = pygame.PixelArray(surface)
     for y in range(surface.get_height()):
         bits = get_bits(image_data[y], surface.get_width())
@@ -86,6 +97,18 @@ def render_panel(surface, image_data, fg_color, bg_color):
                 color = bg_color
             if x < 32 and x > off:
                 pygame.draw.rect(surface, color, ((x-off)*10+32, y*10+64, 8, 8))
+
+def update_page():
+    if spid == 0:
+        return DISPLAY_HUNGER
+    elif spid == 1:
+        return DISPLAY_AGE
+    elif spid == 2:
+        return DISPLAY_WASTE
+    elif spid == 3:
+        return DISPLAY_ENERGY
+    elif spid == 4:
+        return DISPLAY_BACK
 
 selector_img = pygame.Surface((32, 32)).convert_alpha()
 feed_img = pygame.Surface((32, 32))
