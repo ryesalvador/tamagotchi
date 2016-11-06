@@ -49,7 +49,7 @@ waste = 0
 age = 0
 happiness = 0
 
-off = 0
+off = 3
 selid = 0
 spid = 0
 cleanincr = 0
@@ -65,6 +65,7 @@ overlay_animation = OVERLAY_ZZZ
 stats_page = DISPLAY_HUNGER
 
 import pygame, random, sys
+from pygame.locals import *
 
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -75,7 +76,7 @@ def get_bits(number, num_bits):
     """Solution from http://stackoverflow.com/questions/16659944/iterate-between-bits-in-a-binary-number"""
     return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
 
-def render_pixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
+def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
     pixels = pygame.PixelArray(surface)
     for y in range(surface.get_height()):
         bits = get_bits(image_data[y], surface.get_width())
@@ -86,7 +87,7 @@ def render_pixels(surface, image_data, fg_color, bg_color=(255, 255, 255)):
                 pixels[x][y] = bg_color
     del pixels
 
-def render_panel(surface, image_data, fg_color, bg_color):
+def render_panel(image_data, fg_color, bg_color):
     for y in range(32):
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
@@ -96,7 +97,13 @@ def render_panel(surface, image_data, fg_color, bg_color):
             else:
                 color = bg_color
             if x < 32 and x > off:
-                pygame.draw.rect(surface, color, ((x-off)*10+32, y*10+64, 8, 8))
+                pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))
+
+def render_buttons(left, top):
+    for i in range(0, 288, 96):
+        pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (left + i, top, 64, 64))
+        pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (left + i + 4, top + 4, 56, 56))
+        pygame.draw.ellipse(screen, PIXEL_COLOR, (left + i, top, 64, 64), 1)
 
 def update_page():
     if spid == 0:
@@ -116,11 +123,11 @@ flush_img = pygame.Surface((32, 32))
 health_img = pygame.Surface((32, 32))
 zzz_img = pygame.Surface((32, 32))
 
-render_pixels(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-render_pixels(feed_img, FEED, PIXEL_COLOR, NONPIXEL_COLOR)
-render_pixels(flush_img, FLUSH, PIXEL_COLOR, NONPIXEL_COLOR)
-render_pixels(health_img, HEALTH, PIXEL_COLOR, NONPIXEL_COLOR)
-render_pixels(zzz_img, ZZZ, PIXEL_COLOR, NONPIXEL_COLOR)
+render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
+render_component(feed_img, FEED, PIXEL_COLOR, NONPIXEL_COLOR)
+render_component(flush_img, FLUSH, PIXEL_COLOR, NONPIXEL_COLOR)
+render_component(health_img, HEALTH, PIXEL_COLOR, NONPIXEL_COLOR)
+render_component(zzz_img, ZZZ, PIXEL_COLOR, NONPIXEL_COLOR)
 
 screen.blit(pygame.transform.flip(feed_img, True, False), (64, 16))
 screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
@@ -128,17 +135,8 @@ screen.blit(pygame.transform.flip(flush_img, True, False), (128, 16))
 screen.blit(pygame.transform.flip(health_img, True, False), (192, 16))
 screen.blit(pygame.transform.flip(zzz_img, True, False), (256, 16))
 
-pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64,420, 64, 64))
-pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68,424, 56, 56))
-pygame.draw.ellipse(screen, PIXEL_COLOR, (64,420, 64, 64), 1)
-
-pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64+96,420, 64, 64))
-pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68+96,424, 56, 56))
-pygame.draw.ellipse(screen, PIXEL_COLOR, (64+96,420, 64, 64), 1)
-
-pygame.draw.ellipse(screen, BTN_BORDER_COLOR, (64+192,420, 64, 64))
-pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (68+192,424, 56, 56))
-pygame.draw.ellipse(screen, PIXEL_COLOR, (64+192,420, 64, 64), 1)
+render_panel(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR)
+render_buttons(64, 420)
 
 while True:
     for event in pygame.event.get():
