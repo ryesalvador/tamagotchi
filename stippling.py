@@ -87,7 +87,7 @@ def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
                 pixels[x][y] = bg_color
     del pixels
 
-def render_panel(image_data, fg_color, bg_color):
+def render_display(image_data, fg_color, bg_color):
     for y in range(32):
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
@@ -105,37 +105,17 @@ def render_buttons(left, top):
         pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (left + i + 4, top + 4, 56, 56))
         pygame.draw.ellipse(screen, PIXEL_COLOR, (left + i, top, 64, 64), 1)
 
-def update_page():
-    if spid == 0:
-        return DISPLAY_HUNGER
-    elif spid == 1:
-        return DISPLAY_AGE
-    elif spid == 2:
-        return DISPLAY_WASTE
-    elif spid == 3:
-        return DISPLAY_ENERGY
-    elif spid == 4:
-        return DISPLAY_BACK
+z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
+for i in range(len(z)):
+    img = pygame.Surface((32, 32))
+    render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
+    screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
 
 selector_img = pygame.Surface((32, 32)).convert_alpha()
-feed_img = pygame.Surface((32, 32))
-flush_img = pygame.Surface((32, 32))
-health_img = pygame.Surface((32, 32))
-zzz_img = pygame.Surface((32, 32))
-
 render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-render_component(feed_img, FEED, PIXEL_COLOR, NONPIXEL_COLOR)
-render_component(flush_img, FLUSH, PIXEL_COLOR, NONPIXEL_COLOR)
-render_component(health_img, HEALTH, PIXEL_COLOR, NONPIXEL_COLOR)
-render_component(zzz_img, ZZZ, PIXEL_COLOR, NONPIXEL_COLOR)
-
-screen.blit(pygame.transform.flip(feed_img, True, False), (64, 16))
 screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
-screen.blit(pygame.transform.flip(flush_img, True, False), (128, 16))
-screen.blit(pygame.transform.flip(health_img, True, False), (192, 16))
-screen.blit(pygame.transform.flip(zzz_img, True, False), (256, 16))
 
-render_panel(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR)
+render_display(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR)
 render_buttons(64, 420)
 
 while True:
