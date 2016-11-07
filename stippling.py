@@ -49,7 +49,7 @@ waste = 0
 age = 0
 happiness = 0
 
-off = 3
+
 selid = 0
 spid = 0
 cleanincr = 0
@@ -87,17 +87,29 @@ def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
                 pixels[x][y] = bg_color
     del pixels
 
+
+off = 13
 def render_display(image_data, fg_color, bg_color):
     for y in range(32):
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
-        for x, bit in enumerate(bits):
+        x = 0
+        for pos, bit in enumerate(bits):            
+            x = pos            
             if (bit):
                 color = fg_color
             else:
                 color = bg_color
-            if x < 32 and x > off:
+            if x < abs(off):
+                print 'x is: %d, abs off is: %d' % (x, abs(off))
+                pygame.draw.rect(screen, bg_color, (x*10+32, y*10+64, 8, 8))        
+            if x < 32 and x >= off:            
                 pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))
+        x -= off
+        for i in range(len(bits) - 32):
+            x += 1
+            pygame.draw.rect(screen, bg_color, ((x-off)*10+32, y*10+64, 8, 8))
+            
 
 def render_buttons(left, top):
     for i in range(0, 288, 96):
