@@ -84,8 +84,15 @@ def render_buttons(left, top):
         pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (left + i + 4, top + 4, 56, 56))
         pygame.draw.ellipse(screen, PIXEL_COLOR, (left + i, top, 64, 64), 1)
 
-def get_button_at_pixel(x, y):
-    pass
+def get_button_at_pixel(x, y): 
+    if y > 420 and y < 484:
+        button = 0
+        for i in range(0, 288, 96):
+            if x > 64 + i and x < 128 + i:
+                return button
+            else:
+                button += 1
+    return None   
 
 def main():
     global screen
@@ -108,8 +115,7 @@ def main():
     mousex = 0
     mousey = 0
 
-    button = None
-    mouse_moved = False
+    #mouse_moved = False
     has_overlay_animation = False
 
     current_animation = IDLE_EGG
@@ -140,7 +146,8 @@ def main():
                 mousex, mousey = event.pos
 
         button = get_button_at_pixel(mousex, mousey)
-
+        if button != None:
+            print 'Button no: %d' % button
 
         pygame.display.update()
 
