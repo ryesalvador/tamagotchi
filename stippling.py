@@ -95,7 +95,7 @@ def render_display(image_data, fg_color, bg_color):
         bits.reverse()
         for x, bit in enumerate(bits):
             color = bg_color
-            if x < abs(off):
+            if x < abs(off) and off < 0:
                 pygame.draw.rect(screen, color, (x*10+32, y*10+64, 8, 8))
 
             if x < 32 and x >= off:            
@@ -103,7 +103,7 @@ def render_display(image_data, fg_color, bg_color):
                     color = fg_color
                 pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))
 
-            if x >= 32 and x < len(bits):
+            elif x >= 32 and x < len(bits):
                 pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))        
             
 def render_buttons(left, top):
