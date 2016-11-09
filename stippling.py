@@ -1,3 +1,6 @@
+import pygame, random, sys
+from pygame.locals import *
+
 #Animations
 IDLE_EGG = ((0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7e000,0x87000,0x103800,0x300c00,0x700400,0x418200,0x418200,0x400200,0x700600,0x3c0c00,0x1e0800,0x3ffc00,0x0),(0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x7e000,0x87000,0x103800,0x300c00,0x700400,0x400200,0x418200,0x418200,0x700600,0x3c0c00,0xffff00,0x0))
 IDLE_BABY = ((0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x78000,0xb4000,0x1fe000), (0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x78000,0xcc000,0x84000,0xb4000,0x84000,0x78000,0x0))
@@ -43,35 +46,6 @@ BTN_CENTER_COLOR = (200, 33, 44)
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 520
 
-hunger = 0
-energy = 0
-waste = 0
-age = 0
-happiness = 0
-
-
-selid = 0
-spid = 0
-cleanincr = 0
-
-mousex = 0
-mousey = 0
-
-mouse_moved = False
-has_overlay_animation = False
-
-current_animation = IDLE_EGG
-overlay_animation = OVERLAY_ZZZ
-stats_page = DISPLAY_HUNGER
-
-import pygame, random, sys
-from pygame.locals import *
-
-pygame.init()
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-pygame.display.set_caption('TamagotchiPy')
-screen.fill(BG_COLOR)
-
 def get_bits(number, num_bits):
     """Solution from http://stackoverflow.com/questions/16659944/iterate-between-bits-in-a-binary-number"""
     return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
@@ -87,9 +61,7 @@ def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
                 pixels[x][y] = bg_color
     del pixels
 
-
-off = 8
-def render_display(image_data, fg_color, bg_color):
+def render_display(image_data, fg_color, bg_color, off=0):
     for y in range(32):
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
@@ -112,25 +84,65 @@ def render_buttons(left, top):
         pygame.draw.ellipse(screen, BTN_CENTER_COLOR, (left + i + 4, top + 4, 56, 56))
         pygame.draw.ellipse(screen, PIXEL_COLOR, (left + i, top, 64, 64), 1)
 
-z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
-for i in range(len(z)):
-    img = pygame.Surface((32, 32))
-    render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
-    screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
+def get_button_at_pixel(x, y):
+    pass
 
-selector_img = pygame.Surface((32, 32)).convert_alpha()
-render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
+def main():
+    global screen
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+    pygame.display.set_caption('TamagotchiPy')
+    screen.fill(BG_COLOR)
 
-render_display(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR)
-render_buttons(64, 420)
+    hunger = 0
+    energy = 0
+    waste = 0
+    age = 0
+    happiness = 0
 
-while True:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            sys.exit()
-        elif event.type == MOUSEMOTION:
-            mousex, mousey = event.pos
-            mouse_moved = True
-    pygame.display.update()
+    off = 0
+    selid = 0
+    spid = 0
+    cleanincr = 0
+
+    mousex = 0
+    mousey = 0
+
+    button = None
+    mouse_moved = False
+    has_overlay_animation = False
+
+    current_animation = IDLE_EGG
+    overlay_animation = OVERLAY_ZZZ
+    stats_page = DISPLAY_HUNGER
+
+    z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
+    for i in range(len(z)):
+        img = pygame.Surface((32, 32))
+        render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
+        screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
+
+    selector_img = pygame.Surface((32, 32)).convert_alpha()
+    render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
+    screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
+
+    render_display(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR, off)
+    render_buttons(64, 420)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == MOUSEMOTION:
+                mousex, mousey = event.pos
+            elif event.type == MOUSEBUTTONUP:
+                mousex, mousey = event.pos
+
+        button = get_button_at_pixel(mousex, mousey)
+
+
+        pygame.display.update()
+
+if __name__ == '__main__':
+    main()
