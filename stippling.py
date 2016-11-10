@@ -43,6 +43,7 @@ TRANSPARENT_COLOR = (0, 0, 0, 0)
 BTN_BORDER_COLOR = (128, 12, 24)
 BTN_CENTER_COLOR = (200, 33, 44)
 
+FPS = 30
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 520
 
@@ -95,11 +96,14 @@ def get_button_at_pixel(x, y):
     return None   
 
 def main():
-    global screen
+    global screen, clock
     pygame.init()
+    clock = pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('TamagotchiPy')
     screen.fill(BG_COLOR)
+    pygame.key.set_repeat(100, 5)
+    pygame.font.init()
 
     hunger = 0
     energy = 0
@@ -112,44 +116,57 @@ def main():
     spid = 0
     cleanincr = 0
 
-    mousex = 0
-    mousey = 0
-
-    #mouse_moved = False
+    stats = False
     has_overlay_animation = False
 
     current_animation = IDLE_EGG
     overlay_animation = OVERLAY_ZZZ
     stats_page = DISPLAY_HUNGER
 
-    z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
-    for i in range(len(z)):
-        img = pygame.Surface((32, 32))
-        render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
-        screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
-
-    selector_img = pygame.Surface((32, 32)).convert_alpha()
-    render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-    screen.blit(pygame.transform.flip(selector_img, True, False), (64, 16))
-
     render_display(current_animation[0], PIXEL_COLOR, NONPIXEL_COLOR, off)
     render_buttons(64, 420)
 
     while True:
+        mousex = 0
+        mousey = 0        
+
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == MOUSEMOTION:
-                mousex, mousey = event.pos
             elif event.type == MOUSEBUTTONUP:
-                mousex, mousey = event.pos
+                mousex, mousey = event.pos      
 
         button = get_button_at_pixel(mousex, mousey)
-        if button != None:
-            print 'Button no: %d' % button
+
+        if button == 0:
+            if stats:
+                pass
+            else:
+                selid -= 1
+                if selid <= -1:
+                    selid = 3
+        elif button == 1:
+            pass
+        elif button == 2:
+            if stats:
+                pass
+            else:
+                selid += 1
+                selid %= 4
+
+        z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
+        for i in range(len(z)):
+            img = pygame.Surface((32, 32))
+            render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
+            screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
+
+        selector_img = pygame.Surface((32, 32)).convert_alpha()
+        render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
+        screen.blit(pygame.transform.flip(selector_img, True, False), (64+(selid*64), 16))
 
         pygame.display.update()
+        clock.tick(FPS)
 
 if __name__ == '__main__':
     main()
