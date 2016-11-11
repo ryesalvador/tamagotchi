@@ -98,7 +98,7 @@ def get_button_at_pixel(x, y):
     return None
 
 def get_next_frame(animation_frames, current_frame):
-    pass
+    return (current_frame + 1) % len(animation_frames)
 
 def get_offset():
     return random.randint(-3, 2)   
@@ -311,7 +311,7 @@ def main():
         render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
         screen.blit(pygame.transform.flip(selector_img, True, False), (64+(selid*64), 16))
 
-        render_display(IDLE_EGG[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
+        render_display(current_animation[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
         pygame.display.update()
         clock.tick(FPS)
 
