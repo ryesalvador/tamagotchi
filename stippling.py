@@ -93,7 +93,37 @@ def get_button_at_pixel(x, y):
                 return button
             else:
                 button += 1
-    return None   
+    return None
+
+def get_next_frame(animation_frames, current_frame):
+    pass
+
+def get_offset():
+    return random.randint(-3, 2)   
+
+def do_random_event(pet):
+    num = random.randint(0, 31)
+    if num == 12:
+        pet['hunger'] += 1
+    elif num == 16:
+        pet['energy'] -= 1
+    elif num == 18:
+        pet['energy'] += 1
+    elif num == 20:
+        pet['waste'] += 1
+    elif num == 7:
+        pet['happiness'] += 1
+    elif num == 4:
+        pet['happiness'] -= 1
+
+def do_cycle(pet):
+    do_random_event(pet)
+    pet['hunger'] += 1
+    pet['waste'] += 1
+    pet['energy'] -= 1
+    pet['age'] += 2
+    if pet['waste'] >= WASTE_EXPUNGE:
+        pet['happiness'] -= 1
 
 def main():
     global screen, clock
@@ -105,19 +135,25 @@ def main():
     pygame.key.set_repeat(100, 5)
     pygame.font.init()
 
-    hunger = 0
-    energy = 0
-    waste = 0
-    age = 0
-    happiness = 0
+    # Tamagotchi
+    pet = {'hunger':0, 'energy':0, 'waste':0, 'age':0, 'happiness':0} 
 
+    # Counters
     off = 0
     selid = 0
     spid = 0
     cleanincr = 0
+    frame = 0
+    ol_frame = 0
 
+    # Flags
     stats = False
     has_overlay_animation = False
+    cleaning = False;
+    eating = False;
+    stats = False;
+    sleeping = False;
+    dead = False;
 
     current_animation = IDLE_EGG
     overlay_animation = OVERLAY_ZZZ
@@ -135,25 +171,84 @@ def main():
                 pygame.quit()
                 sys.exit()
             elif event.type == MOUSEBUTTONUP:
-                mousex, mousey = event.pos      
+                mousex, mousey = event.pos 
 
         button = get_button_at_pixel(mousex, mousey)
-
         if button == 0:
             if stats:
-                pass
+                spid -= 1
+                if spid <= -1:
+                    spid = 4
+                update_page()
             else:
                 selid -= 1
                 if selid <= -1:
                     selid = 3
         elif button == 1:
-            pass
+            center_button()
         elif button == 2:
             if stats:
-                pass
+                spid += 1
+                spid %= 5
+                update_page()
             else:
                 selid += 1
                 selid %= 4
+
+        if stage == 0 and pet['age'] > AGE_HATCH:
+            stage += 1
+            current_animation = IDLE_BABY
+            has_overlay_animation = False
+        if stage == 1 and pet['age'] > AGE_MATURE:
+            stage += 1
+            current_animation = IDLE_MATURE
+        if eating and ol_fram == len(overlay_animation) - 1:
+            eating = False
+            has_overlay_animation = False
+            ol_frame = 0
+            pet['hunger'] = 0
+        if sleeping:
+            pet['energy'] += 8
+            if pet['energy'] >= 256:
+                sleeping = False
+                has_overlay_animation = False
+                if stage == 0:
+                    current_animation = IDLE_EGG
+                elif stage == 1:
+                    current_animation = IDLE_BABY
+                elif stage == 2:
+                    current_animation = IDLE_MATURE
+        if cleaning:
+            off = cleanincr - 1
+            if off == -33:
+                off = 0
+                cleanincr = 0
+                cleaning = False
+                has_overlay_animation = False
+                pet['waste'] = 0
+        else:
+            if not dead:
+                frame = get_next_frame(current_animation, frame)
+                off = get_offset()
+                if not sleeping and not dead:
+                    do_cycle(pet)
+                if pet['energy'] < ENERGY_PASSOUT:
+                    if stage > 0:
+                        pet['happiness'] -= 64
+                    trigger_sleep()
+                    
+        if not sleeping and not cleaning and not eating and not dead:
+            if pet['waste'] >= WASTE_EXPUNGE:
+                overlay_animation = OVERLAY_STINK
+                has_overlay_animation = True
+            elif pet['energy'] <= ENERGY_TIRED or pet['hunger'] >= HUNGER_NEEDSTOEAT or pet['waste'] >= WASTE_EXPUNGE - WASTE_EXPUNGE / 3:
+                overlay_animation = OVERLAY_EXCLAIM
+                has_overlay_animation = True
+            if not dead:
+                if pet['hunger'] >= HUNGER_DEADFROMNOTEATING:
+                    trigger_death()
+                elif pet['age'] >= AGE_DEATHFROMNATURALCAUSES:
+                    trigger_death()
 
         z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
         for i in range(len(z)):
@@ -167,6 +262,28 @@ def main():
 
         pygame.display.update()
         clock.tick(FPS)
+
+    def trigger_sleep():
+        sleeping = True
+        overlay_animation = OVERLAY_ZZZ
+        if stage == 1:
+            current_animation = SLEEP_BABY
+        elif stage == 2:
+            current_animation = SLEEP_MATURE
+        has_overlay_animation = True
+
+    def trigger_death():
+        dead = True
+        overlay_animation = OVERLAY_DEAD
+        if stage == 1:
+            current_animation = SLEEP_BABY
+        elif stage == 2:
+            current_animation = SLEEP_MATURE
+        has_overlay_animation = True
+        off = 3
+
+    def update_page():
+        if spid == 
 
 if __name__ == '__main__':
     main()
