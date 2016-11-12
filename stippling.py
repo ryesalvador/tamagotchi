@@ -45,7 +45,7 @@ TRANSPARENT_COLOR = (0, 0, 0, 0)
 BTN_BORDER_COLOR = (128, 12, 24)
 BTN_CENTER_COLOR = (200, 33, 44)
 
-FPS = 30
+FPS = 1
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 520
 
@@ -127,56 +127,38 @@ def do_cycle(pet):
     if pet['waste'] >= WASTE_EXPUNGE:
         pet['happiness'] -= 1
 
+def trigger_sleep(stage):
+    if stage == 1:
+        current_anim = SLEEP_BABY
+    elif stage == 2:
+        current_anim = SLEEP_MATURE
+    overlay_anim = OVERLAY_ZZZ
+    return current_anim, overlay_anim, True, True
+
+def trigger_death(stage):
+    if stage == 1:
+        current_anim = SLEEP_BABY
+    elif stage == 2:
+        current_anim = SLEEP_MATURE
+    overlay_anim = OVERLAY_DEAD
+    ####off = 3
+    return current_anim, overlay_anim, True, True
+
+def update_page(spid):
+# Good
+    if spid == 0:
+        stats_page = DISPLAY_HUNGER
+    elif spid == 1:
+        stats_page = DISPLAY_AGE
+    elif spid == 2:
+        stats_page = DISPLAY_WASTE
+    elif spid == 3:
+        stats_page = DISPLAY_ENERGY
+    elif spid == 4:
+        stats_page = DISPLAY_BACK
+    return stats_page
+
 def main():
-    def trigger_sleep():
-        sleeping = True
-        overlay_animation = OVERLAY_ZZZ
-        if stage == 1:
-            current_animation = SLEEP_BABY
-        elif stage == 2:
-            current_animation = SLEEP_MATURE
-        has_overlay_animation = True
-
-    def trigger_death():
-        dead = True
-        overlay_animation = OVERLAY_DEAD
-        if stage == 1:
-            current_animation = SLEEP_BABY
-        elif stage == 2:
-            current_animation = SLEEP_MATURE
-        has_overlay_animation = True
-        off = 3
-
-    def update_page():
-        if spid == 0:
-            stats_page = DISPLAY_HUNGER
-        elif spid == 1:
-            stats_page = DISPLAY_AGE
-        elif spid == 2:
-            stats_page = DISPLAY_WASTE
-        elif spid == 3:
-            stats_page = DISPLAY_ENERGY
-        elif spid == 4:
-            stats_page = DISPLAY_BACK
-
-    def center_button():
-        if stage > 0 or selid == 2:
-            if selid == 0:
-                eating = True
-                overlay_animation = OVERLAY_EAT
-                ol_frame = 0
-                has_overlay_animation = True
-            elif selid == 1:
-                cleaning = True
-                overlay_animation = OVERLAY_CLEAN
-                ol_frame = 0
-                has_overlay_animation = True
-            elif selid == 2:
-                stats = not stats
-            elif selid == 3:
-                if energy <= ENERGY_CANSLEEP:
-                    trigger_sleep()
-
     global screen, clock
     pygame.init()
     clock = pygame.time.Clock()
@@ -200,15 +182,15 @@ def main():
 
     # Flags
     stats = False
-    has_overlay_animation = False
+    has_overlay = False
     cleaning = False;
     eating = False;
     stats = False;
     sleeping = False;
     dead = False;
 
-    current_animation = IDLE_EGG
-    overlay_animation = OVERLAY_ZZZ
+    current_anim = IDLE_EGG
+    overlay_anim = OVERLAY_ZZZ
     stats_page = DISPLAY_HUNGER
 
     render_buttons(64, 420)
@@ -230,76 +212,92 @@ def main():
                 spid -= 1
                 if spid <= -1:
                     spid = 4
-                update_page()
+                stats_page = update_page(spid)
             else:
                 selid -= 1
                 if selid <= -1:
                     selid = 3
         elif button == 1:
-            center_button()
+            if stage > 0 or selid == 2:
+                if selid == 0:
+                    eating = True
+                    overlay_anim = OVERLAY_EAT
+                    ol_frame = 0
+                    has_overlay = True
+                elif selid == 1:
+                    cleaning = True
+                    overlay_anim = OVERLAY_CLEAN
+                    ol_frame = 0
+                    has_overlay = True
+                elif selid == 2:
+                    stats = not stats
+                elif selid == 3:
+                    if energy <= ENERGY_CANSLEEP:
+                        current_anim, overlay_anim, sleeping, has_overlay = trigger_sleep(stage)
         elif button == 2:
             if stats:
                 spid += 1
                 spid %= 5
-                update_page()
+                stats_page = update_page(spid)
             else:
                 selid += 1
                 selid %= 4
 
         if stage == 0 and pet['age'] > AGE_HATCH:
             stage += 1
-            current_animation = IDLE_BABY
-            has_overlay_animation = False
+            current_anim = IDLE_BABY
+            has_overlay = False
         if stage == 1 and pet['age'] > AGE_MATURE:
             stage += 1
-            current_animation = IDLE_MATURE
-        if eating and ol_frame == len(overlay_animation) - 1:
+            current_anim = IDLE_MATURE
+        if eating and ol_frame == len(overlay_anim[ol_frame]) - 1:
             eating = False
-            has_overlay_animation = False
+            has_overlay = False
             ol_frame = 0
             pet['hunger'] = 0
         if sleeping:
             pet['energy'] += 8
             if pet['energy'] >= 256:
                 sleeping = False
-                has_overlay_animation = False
+                has_overlay = False
                 if stage == 0:
-                    current_animation = IDLE_EGG
+                    current_anim = IDLE_EGG
                 elif stage == 1:
-                    current_animation = IDLE_BABY
+                    current_anim = IDLE_BABY
                 elif stage == 2:
-                    current_animation = IDLE_MATURE
+                    current_anim = IDLE_MATURE
         if cleaning:
             off = cleanincr - 1
             if off == -33:
                 off = 0
                 cleanincr = 0
                 cleaning = False
-                has_overlay_animation = False
+                has_overlay = False
                 pet['waste'] = 0
         else:
             if not dead:
-                frame = get_next_frame(current_animation, frame)
+                frame = get_next_frame(current_anim, frame)
                 off = get_offset()
-                if not sleeping and not dead:
+            if not sleeping and not dead:
                     do_cycle(pet)
-                if pet['energy'] < ENERGY_PASSOUT:
-                    if stage > 0:
-                        pet['happiness'] -= 64
-                    trigger_sleep()
+            if pet['energy'] < ENERGY_PASSOUT:
+                if stage > 0:
+                    pet['happiness'] -= 64
+                print 'Triggering sleep'                    
+                current_anim, overlay_anim, sleeping, has_overlay = trigger_sleep(stage)
                     
         if not sleeping and not cleaning and not eating and not dead:
             if pet['waste'] >= WASTE_EXPUNGE:
-                overlay_animation = OVERLAY_STINK
-                has_overlay_animation = True
+                overlay_anim = OVERLAY_STINK
+                has_overlay = True
             elif pet['energy'] <= ENERGY_TIRED or pet['hunger'] >= HUNGER_NEEDSTOEAT or pet['waste'] >= WASTE_EXPUNGE - WASTE_EXPUNGE / 3:
-                overlay_animation = OVERLAY_EXCLAIM
-                has_overlay_animation = True
+                overlay_anim = OVERLAY_EXCLAIM
+                has_overlay = True
             if not dead:
                 if pet['hunger'] >= HUNGER_DEADFROMNOTEATING:
-                    trigger_death()
+                    current_anim, overlay_anim, dead, has_overlay = trigger_death(stage)
                 elif pet['age'] >= AGE_DEATHFROMNATURALCAUSES:
-                    trigger_death()
+                    current_anim, overlay_anim, dead, has_overlay = trigger_death(stage)
 
         z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
         for i in range(len(z)):
@@ -311,7 +309,7 @@ def main():
         render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
         screen.blit(pygame.transform.flip(selector_img, True, False), (64+(selid*64), 16))
 
-        render_display(current_animation[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
+        render_display(current_anim[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
         pygame.display.update()
         clock.tick(FPS)
 
