@@ -165,9 +165,11 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('PyPet')
     screen.fill(BG_COLOR)
-    pygame.font.init()
+    pygame.font.init()   
 
     render_buttons(64, 420)
+    selector_img = pygame.Surface((32, 32)).convert_alpha()
+    render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
     pygame.time.set_timer(USEREVENT + 1, ONE_SEC)
 
     # Tamagotchi
@@ -313,11 +315,12 @@ def main():
             render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
             screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
 
-        selector_img = pygame.Surface((32, 32)).convert_alpha()
-        render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
         screen.blit(pygame.transform.flip(selector_img, True, False), (64+(selid*64), 16))
 
-        render_display(current_anim[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
+        if stats:
+            render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR)
+        else:
+            render_display(current_anim[frame], PIXEL_COLOR, NONPIXEL_COLOR, off)
         pygame.display.update()
         clock.tick(FPS)
 
