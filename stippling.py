@@ -46,8 +46,7 @@ BTN_BORDER_COLOR = (128, 12, 24)
 BTN_CENTER_COLOR = (200, 33, 44)
 
 FPS = 30
-ONE_SEC = 1000
-HALF_SEC = ONE_SEC / 2
+SECOND = 1000
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 520
 
@@ -177,7 +176,7 @@ def main():
     render_buttons(64, 420)
     selector_img = pygame.Surface((32, 32)).convert_alpha()
     render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
-    pygame.time.set_timer(USEREVENT + 1, ONE_SEC)
+    pygame.time.set_timer(USEREVENT + 1, SECOND)
 
     # Tamagotchi
     pet = {'hunger':0, 'energy':256, 'waste':0, 'age':0, 'happiness':0} 
@@ -217,7 +216,7 @@ def main():
                 mousex, mousey = event.pos 
             elif event.type == USEREVENT + 1:
                 if cleaning:
-                    pygame.time.set_timer(USEREVENT + 1, HALF_SEC)
+                    pygame.time.set_timer(USEREVENT + 1, SECOND / 10)
                 update_game = True
 
         button = get_button_at_pixel(mousex, mousey)
@@ -282,14 +281,15 @@ def main():
                     elif stage == 2:
                         current_anim = IDLE_MATURE
             if cleaning:
-                off = cleanincr - 1
+                off -= 1
+                print off
                 if off == -33:
                     off = 0
                     cleanincr = 0
                     cleaning = False
                     has_overlay = False
                     pet['waste'] = 0
-                    pygame.timer.set_timer(USEREVENT + 1, ONE_SEC)
+                    pygame.time.set_timer(USEREVENT + 1, SECOND)
             else:
                 if not dead:
                     frame = get_next_frame(current_anim, frame)
