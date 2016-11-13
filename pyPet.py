@@ -170,10 +170,7 @@ def main():
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Tamagotchi')
-    screen.fill(BG_COLOR)
-    font = pygame.font.Font(None, 12)
-
-    render_buttons(64, 420)
+    font = pygame.font.Font('assets/DejaVuSans.ttf', 12)
     selector_img = pygame.Surface((32, 32)).convert_alpha()
     render_component(selector_img, SELECTOR, PIXEL_COLOR, TRANSPARENT_COLOR)
     pygame.time.set_timer(USEREVENT + 1, SECOND)
@@ -185,7 +182,6 @@ def main():
     off = 0
     selid = 0
     spid = 0
-    cleanincr = 0
     stage = 0
     frame = 0
     ol_frame = 0
@@ -204,10 +200,14 @@ def main():
     overlay_anim = OVERLAY_ZZZ
     stats_page = DISPLAY_HUNGER
 
+    # Game loop
     while True:
+        screen.fill(BG_COLOR)
+        render_buttons(64, 420)
         mousex = 0
         mousey = 0        
 
+        # Event handler
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -218,7 +218,8 @@ def main():
                 if cleaning:
                     pygame.time.set_timer(USEREVENT + 1, SECOND / 10)
                 update_game = True
-
+        
+        # Buttons logic
         button = get_button_at_pixel(mousex, mousey)
         if button == 0:
             if stats:
@@ -256,6 +257,7 @@ def main():
                 selid += 1
                 selid %= 4
 
+        # Game logic
         if update_game:
             if stage == 0 and pet['age'] > AGE_HATCH:
                 stage += 1
@@ -264,7 +266,7 @@ def main():
             if stage == 1 and pet['age'] > AGE_MATURE:
                 stage += 1
                 current_anim = IDLE_MATURE
-            if eating and ol_frame == len(overlay_anim) - 1: # ???
+            if eating and ol_frame == len(overlay_anim) - 1:
                 eating = False
                 has_overlay = False
                 ol_frame = 0
@@ -318,14 +320,17 @@ def main():
                 ol_frame = get_next_frame(overlay_anim, ol_frame)
             update_game = False
 
+        # Render components
         z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
         for i in range(len(z)):
             img = pygame.Surface((32, 32))
             render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
             screen.blit(pygame.transform.flip(img, True, False), (z[i][1], 16))
 
+        # Render selector
         screen.blit(pygame.transform.flip(selector_img, True, False), (64+(selid*64), 16))
 
+        # Render display
         if stats:
             render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR)
         else:
@@ -334,8 +339,19 @@ def main():
             else:
                 animation = current_anim[frame]
             render_display(animation, PIXEL_COLOR, NONPIXEL_COLOR, off)
-        db = font.render('Debug --', True, PIXEL_COLOR)
-        screen.blit(db, (360, 60))
+
+        # Render debug
+        debug = {'debug':'DEBUG: %s', 'age':'AGE: %s', 'hunger':'HUNGER: %s', 'energy':'ENERGY: %s',
+                 'waste':'WASTE: %d', 'happiness':'HAPPINESS: %s'}
+        y = 60
+        for k, v in debug.items():
+            if pet.has_key(k):
+                surf = font.render(v % pet[k], True, PIXEL_COLOR)
+            else:
+                surf = font.render(v % '--', True, PIXEL_COLOR)
+            screen.blit(surf, (360, y))
+            y += 10
+
         pygame.display.update()
         clock.tick(FPS)
 
