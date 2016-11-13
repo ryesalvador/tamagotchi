@@ -50,10 +50,10 @@ SECOND = 1000
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 520
 
-def bitor(current_anim, overlay_anim):
+def bitor(current_frame, overlay_frame):
     l = []
     for i in range(32):
-        b = current_anim[i] | overlay_anim[i]
+        b = current_frame[i] | overlay_frame[i]
         l.append(b)
     return tuple(l)
 
@@ -61,15 +61,18 @@ def get_bits(number, num_bits):
     """Solution from http://stackoverflow.com/questions/16659944/iterate-between-bits-in-a-binary-number"""
     return [(number >> bit) & 1 for bit in range(num_bits - 1, -1, -1)]
 
-def render_display(image_data, fg_color, bg_color, off=0):
+def render_display(image_data, fg_color, bg_color, off=0, percv=None):
     for y in range(32):
         for x in range(off, 32+off):
             pygame.draw.rect(screen, bg_color, ((x-off)*10+32, y*10+64, 8, 8))
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
         for x, bit in enumerate(bits):
+            if percv is not None: #percv>0&&x > 11 && y > 3&&x<17&&y<3+percv)
+                if bit or percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv:
+                   pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
             if x < 32 and x >= off:            
-                if (bit):
+                if bit:
                     pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
             
 def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
@@ -325,15 +328,16 @@ def main():
         # Render display
         if stats:
             if spid == 0:
-                percv = hunger * 27 / HUNGER_NEEDSTOEAT
+                percv = pet['hunger'] * 27 / HUNGER_NEEDSTOEAT
             elif spid == 1:
-                percv = age * 27 / AGE_DEATHFROMNATURALCAUSES
+                percv = pet['age'] * 27 / AGE_DEATHFROMNATURALCAUSES
             elif spid == 2:
-                percv = (waste % WASTE_EXPUNGE) * 27 / WASTE_EXPUNGE
+                percv = (pet['waste'] % WASTE_EXPUNGE) * 27 / WASTE_EXPUNGE
             elif spid == 3:
-                percv = energy * 27 / 256
-
-            render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR)
+                percv = pet['energy'] * 27 / 256
+            elif spid == 4:
+                percv = None
+            render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR, 0, percv)
         else:
             if has_overlay:
                 animation = bitor(current_anim[frame], overlay_anim[ol_frame])
