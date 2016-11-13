@@ -284,7 +284,6 @@ def main():
                         current_anim = IDLE_MATURE
             if cleaning:
                 off -= 1
-                print off
                 if off == -33:
                     off = 0
                     cleanincr = 0
@@ -300,8 +299,7 @@ def main():
                         do_cycle(pet)
                 if pet['energy'] < ENERGY_PASSOUT:
                     if stage > 0:
-                        pet['happiness'] -= 64
-                    print 'Triggering sleep'                    
+                        pet['happiness'] -= 64                  
                     current_anim, overlay_anim, sleeping, has_overlay = trigger_sleep(stage)
                         
             if not sleeping and not cleaning and not eating and not dead:
@@ -332,6 +330,15 @@ def main():
 
         # Render display
         if stats:
+            if spid == 0:
+                percv = hunger * 27 / HUNGER_NEEDSTOEAT
+            elif spid == 1:
+                percv = age * 27 / AGE_DEATHFROMNATURALCAUSES
+            elif spid == 2:
+                percv = (waste % WASTE_EXPUNGE) * 27 / WASTE_EXPUNGE
+            elif spid == 3:
+                percv = energy * 27 / 256
+
             render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR)
         else:
             if has_overlay:
