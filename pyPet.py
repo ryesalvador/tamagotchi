@@ -68,9 +68,9 @@ def render_display(image_data, fg_color, bg_color, off=0, percv=None):
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
         for x, bit in enumerate(bits):
-            if percv is not None: #percv>0&&x > 11 && y > 3&&x<17&&y<3+percv)
+            if percv is not None:
                 if bit or percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv:
-                   pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
+                    pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
             if x < 32 and x >= off:            
                 if bit:
                     pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
@@ -337,6 +337,8 @@ def main():
                 percv = pet['energy'] * 27 / 256
             elif spid == 4:
                 percv = None
+            if percv > 27:
+                percv = 27
             render_display(stats_page, PIXEL_COLOR, NONPIXEL_COLOR, 0, percv)
         else:
             if has_overlay:
@@ -346,16 +348,13 @@ def main():
             render_display(animation, PIXEL_COLOR, NONPIXEL_COLOR, off)
 
         # Render debug
-        debug = {'debug':'DEBUG: %s', 'age':'AGE: %s', 'hunger':'HUNGER: %s', 'energy':'ENERGY: %s',
-                 'waste':'WASTE: %d', 'happiness':'HAPPINESS: %s'}
-        y = 60
-        for k, v in debug.items():
-            if pet.has_key(k):
-                surf = font.render(v % pet[k], True, PIXEL_COLOR)
-            else:
-                surf = font.render(v % '--', True, PIXEL_COLOR)
-            screen.blit(surf, (360, y))
-            y += 10
+        surf = font.render('DEBUG --', True, PIXEL_COLOR)
+        screen.blit(surf, (360, 60))
+        debug = (('AGE: %s', 'HUNGER: %s', 'ENERGY: %s', 'WASTE: %d', 'HAPPINESS: %s'), \
+                 ('age', 'hunger', 'energy', 'waste', 'happiness'))
+        for pos, y in enumerate(i for i in range(70, 120, 10)):
+            surf = font.render(debug[0][pos] % pet[debug[1][pos]], True, PIXEL_COLOR)
+            screen.blit(surf, (360, y))            
 
         pygame.display.update()
         clock.tick(FPS)
