@@ -1,3 +1,9 @@
+try:
+    import pygame_sdl2
+    pygame_sdl2.import_as_pygame()
+except ImportError:
+    pass
+
 import pygame, random, sys
 from pygame.locals import *
 
@@ -196,7 +202,6 @@ def main():
     # Game loop
     while True:
         screen.fill(BG_COLOR)
-        render_buttons(64, 420)
         mousex = 0
         mousey = 0        
 
@@ -350,7 +355,10 @@ def main():
                  ('age', 'hunger', 'energy', 'waste', 'happiness'))
         for pos, y in enumerate(i for i in range(70, 120, 10)):
             surf = font.render(debug[0][pos] % pet[debug[1][pos]], True, PIXEL_COLOR)
-            screen.blit(surf, (360, y))            
+            screen.blit(surf, (360, y))
+
+        # Render buttons
+        render_buttons(64, 420)            
 
         pygame.display.update()
         clock.tick(FPS)
