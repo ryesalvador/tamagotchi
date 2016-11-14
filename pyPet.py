@@ -63,17 +63,14 @@ def get_bits(number, num_bits):
 
 def render_display(image_data, fg_color, bg_color, off=0, percv=None):
     for y in range(32):
-        for x in range(off, 32+off):
-            pygame.draw.rect(screen, bg_color, ((x-off)*10+32, y*10+64, 8, 8))
         bits = get_bits(image_data[y], 32+off)
         bits.reverse()
-        for x, bit in enumerate(bits):
-            if percv is not None:
-                if bit or percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv:
-                    pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
-            if x < 32 and x >= off:            
-                if bit:
-                    pygame.draw.rect(screen, fg_color, ((x-off)*10+32, y*10+64, 8, 8))       
+        for x in range(off, 32+off):
+            color = bg_color
+            if x in range(len(bits)):
+                if bits[x] or percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv:
+                    color = fg_color
+            pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))
             
 def render_component(surface, image_data, fg_color, bg_color=(255, 255, 255)):
     pixels = pygame.PixelArray(surface)
