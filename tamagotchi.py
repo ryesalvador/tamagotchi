@@ -87,7 +87,7 @@ def render_display(image_data, fg_color, bg_color, off=0, percv=None):
         for x in range(off, 32+off):
             color = bg_color
             if x in range(len(bits)):
-                if bits[x] or percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv:
+                if bits[x] or (percv and percv > 0 and y > 11 and x > 2 and y < 17 and x < 3 + percv):
                     color = fg_color
             pygame.draw.rect(screen, color, ((x-off)*10+32, y*10+64, 8, 8))
             
@@ -334,7 +334,7 @@ def main():
             update_game = False
 
         # Render components
-        z = zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)])
+        z = list(zip([FEED, FLUSH, HEALTH, ZZZ], [i for i in range(64, 320, 64)]))
         for i in range(len(z)):
             img = pygame.Surface((32, 32))
             render_component(img, z[i][0], PIXEL_COLOR, NONPIXEL_COLOR)
